@@ -32,13 +32,13 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    public async Task<IActionResult> Login()
+    public async Task<IActionResult> Login(string userName, string password, bool isPersistent)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, "myUser@email.com"),
-            new Claim("FullName", "John Doe"),
-            new Claim(ClaimTypes.Role, "Administrator"),
+            new Claim(ClaimTypes.Name, userName),
+            // new Claim("FullName", "John Doe"),
+            // new Claim(ClaimTypes.Role, "Administrator"),
         };
 
         var claimsIdentity = new ClaimsIdentity(
@@ -54,7 +54,7 @@ public class HomeController : Controller
             // value set here overrides the ExpireTimeSpan option of 
             // CookieAuthenticationOptions set with AddCookie.
 
-            //IsPersistent = true,
+            IsPersistent = isPersistent,
             // Whether the authentication session is persisted across 
             // multiple requests. When used with cookies, controls
             // whether the cookie's lifetime is absolute (matching the
@@ -68,12 +68,23 @@ public class HomeController : Controller
             // redirect response value.
         };
 
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(claimsIdentity),
-            authProperties);
+        bool isLoggedIn = true;
 
-        return Content("OK");
+        UserValidator userValidator = new UserValidator();
+        if (userValidator.ValidateUser(userName, password))
+        {
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+        }
+        else {
+            isLoggedIn = false;
+        }
+
+
+        return Content(isLoggedIn ? "OK" : "Failed");
     }
 
     public async Task<IActionResult> Logout()
