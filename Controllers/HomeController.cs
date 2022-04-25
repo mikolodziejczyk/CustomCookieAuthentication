@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using myLdapAuthenticationWeb.Models;
 
@@ -46,10 +47,10 @@ public class HomeController : Controller
 
         var authProperties = new AuthenticationProperties
         {
-            //AllowRefresh = <bool>,
+            AllowRefresh = true,
             // Refreshing the authentication session should be allowed.
 
-            //ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7),
             // The time at which the authentication ticket expires. A 
             // value set here overrides the ExpireTimeSpan option of 
             // CookieAuthenticationOptions set with AddCookie.
@@ -91,5 +92,10 @@ public class HomeController : Controller
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return this.StatusCode(StatusCodes.Status200OK);
+    }
+
+    [Authorize]
+    public ActionResult Ping() {
+        return Content(User?.Identity?.Name ?? "");
     }
 }

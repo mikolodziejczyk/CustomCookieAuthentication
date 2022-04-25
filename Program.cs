@@ -8,9 +8,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-        options.SlidingExpiration = true;
-        options.AccessDeniedPath = "/Forbidden/";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+        // options.SlidingExpiration = true;
+        // options.AccessDeniedPath = "/Forbidden/";
+        options.Cookie.Name = "Identity";
     });
 
 var app = builder.Build();
